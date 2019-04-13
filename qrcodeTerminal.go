@@ -3,10 +3,11 @@ package qrcodeTerminal
 import (
 	"fmt"
 
-	"github.com/skip2/go-qrcode"
-	"github.com/mattn/go-colorable"
-	"image/png"
 	nbytes "bytes"
+	"image/png"
+
+	"github.com/mattn/go-colorable"
+	"github.com/skip2/go-qrcode"
 )
 
 type consoleColor string
@@ -86,6 +87,20 @@ func (v *qrcodeTerminal) Get(content interface{}) (result *QRCodeString) {
 		result = v.getQRCodeString(data)
 	}
 	return
+}
+
+func (v *qrcodeTerminal) Image(content interface{}) ([]byte, error) {
+	var qr *qrcode.QRCode
+	var err error
+	if t, ok := content.(string); ok {
+		qr, err = qrcode.New(t, qrcode.RecoveryLevel(v.level))
+	} else if t, ok := content.([]byte); ok {
+		qr, err = qrcode.New(string(t), qrcode.RecoveryLevel(v.level))
+	}
+	if qr != nil && err == nil {
+		return qr.PNG(512)
+	}
+	return nil, nil
 }
 
 func (v *qrcodeTerminal) Get2(bytes []byte) (result *QRCodeString) {
